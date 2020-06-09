@@ -4,8 +4,15 @@ import RNTrackPlayer from 'react-native-track-player';
 
 export default class Webradio extends Component {
   state = {
-    textValue: 'Text',
+    textValue: 'stop',
   };
+
+  buttonLabel = {
+    startBut: 'Start Music',
+    stopBut: 'Stop Music',
+    pauseBut: 'Pause Music',
+  };
+
   initPlayer = () => {
     RNTrackPlayer.setupPlayer().then(() => {
       console.log('Trackplayer set up!');
@@ -34,16 +41,36 @@ export default class Webradio extends Component {
   };
 
   stopMusic = () => {
-    RNTrackPlayer.stop();
+    if (this.state.textValue == 'play' || this.state.textValue == 'pause') {
+      RNTrackPlayer.stop();
+      this.setState({
+        textValue: 'stop',
+      });
+    }
   };
 
-  initialState = {
-    daText: 'Start Music',
+  pauseMusic = () => {
+    if (this.state.textValue == 'play') {
+      RNTrackPlayer.pause();
+      this.setState({
+        textValue: 'pause',
+      });
+    }
   };
 
   playMusic = () => {
-    this.initPlayer();
-    RNTrackPlayer.play();
+    if (this.state.textValue == 'stop') {
+      this.initPlayer();
+      RNTrackPlayer.play();
+      this.setState({
+        textValue: 'play',
+      });
+    } else if (this.state.textValue == 'pause') {
+      RNTrackPlayer.play();
+      this.setState({
+        textValue: 'play',
+      });
+    }
   };
 
   render() {
@@ -51,17 +78,30 @@ export default class Webradio extends Component {
       <View style={webradioStyle.mainContainer}>
         <View style={webradioStyle.mainButton}>
           <Button
-            title={this.initialState.daText}
+            title={this.buttonLabel.startBut}
             onPress={this.playMusic}
             style={webradioStyle.mainButton}
+            color={'green'}
           />
         </View>
         <View style={webradioStyle.mainButton}>
           <Button
-            title={'STOP MUSIC'}
+            title={this.buttonLabel.pauseBut}
+            onPress={this.pauseMusic}
+            style={webradioStyle.mainButton}
+            color={'gray'}
+          />
+        </View>
+        <View style={webradioStyle.mainButton}>
+          <Button
+            title={this.buttonLabel.stopBut}
             onPress={this.stopMusic}
             style={webradioStyle.mainButton}
+            color={'red'}
           />
+        </View>
+        <View style={webradioStyle.mainButton}>
+          <Text style={webradioStyle.mainText}>{this.state.textValue}</Text>
         </View>
       </View>
     );
@@ -77,7 +117,9 @@ const webradioStyle = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   mainButton: {
-    fontSize: 50,
     marginTop: 16,
+  },
+  mainText: {
+    fontSize: 20,
   },
 });

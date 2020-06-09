@@ -190,8 +190,11 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
+
+    // CUSTOM
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation project(':react-native-track-player')
+    // END CUSTOM
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 

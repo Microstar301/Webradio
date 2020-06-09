@@ -7,7 +7,7 @@ const connection = mysql.createPool({
   host: 'protepto.com', // Your connection adress (localhost)
   user: 'micro', //Your database's username.
   password: 'M1cr0n', // Your database's password.
-  database: 'stations', // Your database's name.
+  database: 'mot_rn_webradio', // Your database's name.
 });
 
 // Starting our app.

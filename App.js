@@ -16,8 +16,8 @@ const background_image = { uri: "https://thumbs.dreamstime.com/z/abstract-geomet
 
 export default class Webradio extends Component {
   state = {
-    textValue: 'stop',
-    curTrack: {},
+    textValue: '',
+    curTrack: '',
   };
 
   buttonLabel = {
@@ -31,58 +31,55 @@ export default class Webradio extends Component {
     });
   };
 
-  addTrack = (title, url, artwork) => {
+  addTrack = (tid, title, url, artwork) => {
     var track = {
-      id: '0', // Must be a string, required
-
+      id: tid, // Must be a string, required
       url: url, // Load media from the network
-      //url: require('./avaritia.ogg'), // Load media from the app bundle
-      //url: 'file:///storage/sdcard0/Music/avaritia.wav' // Load media from the file system
-
+      artist: 'Webradio',
       title: title,
-      date: '2014-05-20T07:00:00+00:00', // RFC 3339
-
       artwork: artwork, // Load artwork from the network
-      //artwork: require('./avaritia.jpg'), // Load artwork from the app bundle
-      //artwork: 'file:///storage/sdcard0/Downloads/artwork.png' // Load artwork from the file system
     };
     RNTrackPlayer.add(track).then(function() {
       console.debug('Tracks added');
     });
   };
 
-  stopMusic = () => {
-    if (this.state.textValue == 'play' || this.state.textValue == 'pause') {
+  stopMusic = async () => {
+    var state = await RNTrackPlayer.getState();
+    if (
+      state == RNTrackPlayer.STATE_PLAYING ||
+      state == RNTrackPlayer.STATE_PAUSED
+    ) {
       RNTrackPlayer.stop();
       this.setState({
-        textValue: 'stop',
+        curTrack: '',
       });
+      this.updateTrack();
     }
   };
 
-  togglePauseMusic = () => {
-    if (this.state.textValue == 'play') {
+  togglePauseMusic = async () => {
+    var state = await RNTrackPlayer.getState();
+    if (state == RNTrackPlayer.STATE_PLAYING) {
       RNTrackPlayer.pause();
       this.setState({
         textValue: 'pause',
       });
       this.buttonLabel.pauseTogg = 'Play Music';
-    } else if (this.state.textValue == 'pause') {
+    } else if (state == RNTrackPlayer.STATE_PAUSED) {
       RNTrackPlayer.play();
-      this.setState({
-        textValue: 'play',
-      });
       this.buttonLabel.pauseTogg = 'Pause Music';
     }
   };
 
-  playRadio = (title, url, artwork) => {
+  playRadio = async (tid, title, url, artwork) => {
     this.initPlayer();
-    this.addTrack(title, url, artwork);
+    this.addTrack(tid, title, url, artwork);
     RNTrackPlayer.play();
-    this.setState({
-      textValue: 'play',
-    });
+    this.updateTrack();
+    //this.setState({
+    //  curTrack: await RNTrackPlayer.getCurrentTrack(),
+    //});
   };
 
   showJSON = () => {
@@ -98,6 +95,19 @@ export default class Webradio extends Component {
       });
   };
 
+  updateTrack = async () => {
+    var curTID = await RNTrackPlayer.getCurrentTrack();
+    var curSname;
+    this.state.dataSource.map(function(station) {
+      if (station.station_id == curTID) {
+        curSname = station.station_name;
+      }
+    });
+    this.setState({
+      curTrack: curSname,
+    });
+  };
+
   render() {
     this.showJSON();
     return (
@@ -110,6 +120,7 @@ export default class Webradio extends Component {
               title={item.station_id + ' ' + item.station_name}
               onPress={() =>
                 this.playRadio(
+                  item.station_id,
                   item.station_name,
                   item.station_url,
                   item.station_picture,
@@ -120,7 +131,6 @@ export default class Webradio extends Component {
           )}
           keyExtractor={item => item.station_id}
         />
-        <Text>{this.state.data}</Text>
         <View style={webradioStyle.mainButton}>
           <Button
             title={this.buttonLabel.pauseTogg}
@@ -138,7 +148,7 @@ export default class Webradio extends Component {
           />
         </View>
         <View style={webradioStyle.mainButton}>
-          <Text style={webradioStyle.mainText}>{this.state.textValue}</Text>
+          <Text style={webradioStyle.mainText}>{this.state.curTrack}</Text>
         </View>
         </ImageBackground>
       </View>
@@ -152,13 +162,14 @@ const webradioStyle = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
   },
   mainButton: {
     marginTop: 16,
   },
   mainText: {
     fontSize: 20,
+    color: '#000000',
+    marginBottom: 8,
   },
   item: {
     backgroundColor: '#F0FF00',

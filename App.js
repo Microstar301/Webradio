@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, FlatList} from 'react-native';
+import {View, Text, StyleSheet, Button, FlatList, Image} from 'react-native';
 import RNTrackPlayer from 'react-native-track-player';
 
-function Item({title, onPress}) {
+function Item({title, onPress, thumb}) {
   return (
     <View style={webradioStyle.item}>
       <Button title={title.toString()} style={'flex:1'} onPress={onPress} />
+      <Image source={{uri: {thumb}.thumb}} style={webradioStyle.pic} />
     </View>
   );
 }
@@ -13,6 +14,7 @@ function Item({title, onPress}) {
 export default class Webradio extends Component {
   state = {
     textValue: 'stop',
+    curTrack: {},
   };
 
   buttonLabel = {
@@ -29,16 +31,13 @@ export default class Webradio extends Component {
 
   addTrack = (title, url, artwork) => {
     var track = {
-      id: 'unique track id', // Must be a string, required
+      id: '0', // Must be a string, required
 
       url: url, // Load media from the network
       //url: require('./avaritia.ogg'), // Load media from the app bundle
       //url: 'file:///storage/sdcard0/Music/avaritia.wav' // Load media from the file system
 
       title: title,
-      artist: '-',
-      album: '-',
-      genre: '-',
       date: '2014-05-20T07:00:00+00:00', // RFC 3339
 
       artwork: artwork, // Load artwork from the network
@@ -121,6 +120,7 @@ export default class Webradio extends Component {
                   item.station_picture,
                 )
               }
+              thumb={item.station_picture}
             />
           )}
           keyExtractor={item => item.station_id}
@@ -179,5 +179,10 @@ const webradioStyle = StyleSheet.create({
   },
   title: {
     fontSize: 32,
+  },
+  pic: {
+    width: 250,
+    height: 64,
+    resizeMode: 'cover',
   },
 });

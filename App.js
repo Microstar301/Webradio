@@ -18,9 +18,8 @@ export default class Webradio extends Component {
   };
 
   buttonLabel = {
-    startBut: 'Start Music',
     stopBut: 'Stop Music',
-    pauseBut: 'Pause Music',
+    pauseTogg: 'Pause Music',
   };
 
   initPlayer = () => {
@@ -58,12 +57,19 @@ export default class Webradio extends Component {
     }
   };
 
-  pauseMusic = () => {
+  togglePauseMusic = () => {
     if (this.state.textValue == 'play') {
       RNTrackPlayer.pause();
       this.setState({
         textValue: 'pause',
       });
+      this.buttonLabel.pauseTogg = 'Play Music';
+    } else if (this.state.textValue == 'pause') {
+      RNTrackPlayer.play();
+      this.setState({
+        textValue: 'play',
+      });
+      this.buttonLabel.pauseTogg = 'Pause Music';
     }
   };
 
@@ -74,21 +80,6 @@ export default class Webradio extends Component {
     this.setState({
       textValue: 'play',
     });
-  };
-
-  playMusic = () => {
-    if (this.state.textValue == 'stop') {
-      this.initPlayer();
-      RNTrackPlayer.play();
-      this.setState({
-        textValue: 'play',
-      });
-    } else if (this.state.textValue == 'pause') {
-      RNTrackPlayer.play();
-      this.setState({
-        textValue: 'play',
-      });
-    }
   };
 
   showJSON = () => {
@@ -128,16 +119,8 @@ export default class Webradio extends Component {
         <Text>{this.state.data}</Text>
         <View style={webradioStyle.mainButton}>
           <Button
-            title={this.buttonLabel.startBut}
-            onPress={this.playMusic}
-            style={webradioStyle.mainButton}
-            color={'green'}
-          />
-        </View>
-        <View style={webradioStyle.mainButton}>
-          <Button
-            title={this.buttonLabel.pauseBut}
-            onPress={this.pauseMusic}
+            title={this.buttonLabel.pauseTogg}
+            onPress={this.togglePauseMusic}
             style={webradioStyle.mainButton}
             color={'gray'}
           />

@@ -175,7 +175,7 @@ const webradioStyle = StyleSheet.create({
   },
   background_image: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center"
+    width: '100%',
+    height: '100%',
   }
 });

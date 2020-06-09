@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, FlatList, Image,ImageBackground} from 'react-native';
+import {View, Text, StyleSheet, Button, FlatList, Image,ImageBackground,TouchableOpacity} from 'react-native';
 import RNTrackPlayer from 'react-native-track-player';
 
 function Item({title, onPress, thumb}) {
@@ -12,6 +12,10 @@ function Item({title, onPress, thumb}) {
 }
 
 const background_image = { uri: "https://thumbs.dreamstime.com/z/abstract-geometric-background-modern-overlapping-triangles-unusual-color-shapes-your-message-business-tech-presentation-app-53265512.jpg" };
+const radio_image_play ={uri:"https://protepto.com/stuff/mot/play.png"}
+const radio_image_stop ={uri:"https://protepto.com/stuff/mot/stop.png"}
+const radio_image_pause ={uri:"https://protepto.com/stuff/mot/pause.png"}
+
 
 
 export default class Webradio extends Component {
@@ -132,22 +136,24 @@ export default class Webradio extends Component {
           keyExtractor={item => item.station_id}
         />
         <View style={webradioStyle.mainButton}>
-          <Button
-            title={this.buttonLabel.pauseTogg}
-            onPress={this.togglePauseMusic}
-            style={webradioStyle.mainButton}
-            color={'gray'}
-          />
+
+          <TouchableOpacity
+              style={webradioStyle.button_controls}
+              onPress={this.togglePauseMusic}>
+
+            <Image  source={radio_image_play} style={webradioStyle.radioPic} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+              style={webradioStyle.button_controls}
+              onPress={this.stopMusic}>
+
+            <Image  source={radio_image_stop} style={webradioStyle.radioPic} />
+          </TouchableOpacity>
+
         </View>
         <View style={webradioStyle.mainButton}>
-          <Button
-            title={this.buttonLabel.stopBut}
-            onPress={this.stopMusic}
-            style={webradioStyle.mainButton}
-            color={'red'}
-          />
-        </View>
-        <View style={webradioStyle.mainButton}>
+
           <Text style={webradioStyle.mainText}>{this.state.curTrack}</Text>
         </View>
         </ImageBackground>
@@ -165,6 +171,12 @@ const webradioStyle = StyleSheet.create({
   },
   mainButton: {
     marginTop: 16,
+    width: '100%',
+    flexDirection: 'row',
+    display: 'flex',
+    justifyContent: 'flex-end',
+
+
   },
   mainText: {
     fontSize: 20,
@@ -175,16 +187,35 @@ const webradioStyle = StyleSheet.create({
     backgroundColor: '#F0FF00',
     marginVertical: 8,
     marginHorizontal: 16,
+
   },
   title: {
     fontSize: 32,
   },
   pic: {
-    width: 250,
+    flex:1,
     height: 64,
     resizeMode: 'cover',
+    top: 0, left: 0,
+    right: 0, bottom: 0,
+
   },
   background_image: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  button_controls:{
+    borderWidth:1,
+    borderColor:'rgba(0,0,0,0.2)',
+    alignItems:'center',
+    justifyContent:'center',
+    width:86,
+    height:86,
+    backgroundColor:'#fff',
+    borderRadius:43,
+  },
+  radioPic:{
     flex: 1,
     width: '100%',
     height: '100%',

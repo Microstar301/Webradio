@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, FlatList, Image} from 'react-native';
+import {View, Text, StyleSheet, Button, FlatList, Image,ImageBackground} from 'react-native';
 import RNTrackPlayer from 'react-native-track-player';
 
 function Item({title, onPress, thumb}) {
@@ -11,6 +11,9 @@ function Item({title, onPress, thumb}) {
   );
 }
 
+const background_image = { uri: "https://thumbs.dreamstime.com/z/abstract-geometric-background-modern-overlapping-triangles-unusual-color-shapes-your-message-business-tech-presentation-app-53265512.jpg" };
+
+
 export default class Webradio extends Component {
   state = {
     textValue: 'stop',
@@ -18,8 +21,8 @@ export default class Webradio extends Component {
   };
 
   buttonLabel = {
-    stopBut: 'Stop Music',
     pauseTogg: 'Pause Music',
+    stopBut: 'Stop Music',
   };
 
   initPlayer = () => {
@@ -99,6 +102,7 @@ export default class Webradio extends Component {
     this.showJSON();
     return (
       <View style={webradioStyle.mainContainer}>
+        <ImageBackground source={background_image} style={webradioStyle.background_image}>
         <FlatList
           data={this.state.dataSource}
           renderItem={({item}) => (
@@ -136,6 +140,7 @@ export default class Webradio extends Component {
         <View style={webradioStyle.mainButton}>
           <Text style={webradioStyle.mainText}>{this.state.textValue}</Text>
         </View>
+        </ImageBackground>
       </View>
     );
   }
@@ -168,4 +173,9 @@ const webradioStyle = StyleSheet.create({
     height: 64,
     resizeMode: 'cover',
   },
+  background_image: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center"
+  }
 });

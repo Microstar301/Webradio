@@ -14,6 +14,7 @@ import {
 import RNTrackPlayer from 'react-native-track-player';
 import {Button, ThemeProvider} from 'react-native-elements';
 import Icon from 'react-native-material-ui/src/Icon';
+import TextTicker from 'react-native-text-ticker';
 
 // ON ERROR INSTALL THIS:
 // https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
@@ -241,7 +242,17 @@ class Allstations extends Component {
                   marginRight: 8,
                 }}
               />
-              <Text style={styles.trackName}>{this.state.curTrack}</Text>
+              <View style={[styles.trackContainer]}>
+                <TextTicker
+                  duration={3000}
+                  loop
+                  bounce
+                  repeatSpacer={50}
+                  marqueeDelay={1000}
+                  style={[styles.trackName]}>
+                  {this.state.curTrack}
+                </TextTicker>
+              </View>
             </View>
             <View style={{flexDirection: 'row'}}>
               <View style={{marginRight: 8, elevation: 2}}>
@@ -277,7 +288,7 @@ class Allstations extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 0,
   },
   header: {
     height: 100,
@@ -311,13 +322,19 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-between',
   },
-  trackName: {
+  trackContainer: {
     paddingTop: 16,
-    paddingRight: 16,
+    height: 64,
+    maxWidth: '64%',
+    alignItems: 'center',
+    fontSize: 20,
+  },
+  trackName: {
     fontSize: 20,
     color: '#000000',
     marginBottom: 8,
-    justifyContent: 'space-between',
+    textAlign: 'left',
+    textAlignVertical: 'center',
   },
   title: {
     color: '#ffffff',

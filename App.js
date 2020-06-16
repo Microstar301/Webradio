@@ -18,6 +18,7 @@ import Allstations from './src/screens/allstations';
 import Favorites from './src/screens/favorites';
 import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
+import {RFValue} from 'react-native-responsive-fontsize';
 
 const Drawer = createDrawerNavigator();
 const theme = {
@@ -41,6 +42,7 @@ export default class App extends Component {
             drawerStyle={{
               marginTop: 100,
               width: 240,
+              fontSize: RFValue(24),
             }}>
             <Drawer.Screen name="Home" component={Allstations} />
             <Drawer.Screen name="Favorites" component={Favorites} />

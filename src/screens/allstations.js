@@ -15,6 +15,7 @@ import RNTrackPlayer from 'react-native-track-player';
 import {Button, ThemeProvider} from 'react-native-elements';
 import Icon from 'react-native-material-ui/src/Icon';
 import TextTicker from 'react-native-text-ticker';
+import {RFPercentage, RFValue} from 'react-native-responsive-fontsize';
 
 // ON ERROR INSTALL THIS:
 // https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
@@ -61,7 +62,7 @@ class Allstations extends Component {
     var track = {
       id: tid, // Must be a string, required
       url: url, // Load media from the network
-      artist: 'Webradio',
+      artist: '1',
       title: title,
       artwork: artwork, // Load artwork from the network
     };
@@ -231,7 +232,8 @@ class Allstations extends Component {
         />
         <View style={[styles.footer]}>
           <View style={styles.controlButtons}>
-            <View style={{flexDirection: 'row'}}>
+            <View
+              style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
               <Image
                 source={{uri: this.state.curImg}}
                 style={{
@@ -279,7 +281,6 @@ class Allstations extends Component {
               />
             </View>
           </View>
-          <View style={styles.controlButtons} />
         </View>
       </View>
     );
@@ -291,6 +292,8 @@ const styles = StyleSheet.create({
     flex: 0,
   },
   header: {
+    fontSize: RFValue(32, 1080),
+    flex: 1,
     height: 100,
     position: 'absolute',
     left: 0,
@@ -302,6 +305,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   footer: {
+    flex: 1,
     height: 100,
     position: 'absolute',
     backgroundColor: '#ffffff',
@@ -316,34 +320,38 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   controlButtons: {
+    flex: 1,
     marginTop: 16,
     marginRight: 16,
     flexDirection: 'row',
+    alignItems: 'stretch',
     display: 'flex',
     justifyContent: 'space-between',
   },
   trackContainer: {
+    flex: 2,
     paddingTop: 16,
+    marginRight: 8,
     height: 64,
-    maxWidth: '64%',
+    maxWidth: '100%',
     alignItems: 'center',
     fontSize: 20,
   },
   trackName: {
     fontSize: 20,
     color: '#000000',
-    marginBottom: 8,
     textAlign: 'left',
     textAlignVertical: 'center',
   },
   title: {
+    fontSize: RFValue(32, 900),
     color: '#ffffff',
     backgroundColor: '#9900ff',
     padding: 8,
-    fontSize: 32,
     marginTop: 16,
     marginRight: 16,
     marginBottom: 16,
+    maxWidth: '80%',
     fontFamily: 'Roboto',
     letterSpacing: 16,
     textAlign: 'center',

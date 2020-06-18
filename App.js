@@ -30,25 +30,41 @@ const theme = {
 export default class App extends Component {
   render() {
     return (
+
       <ThemeProvider theme={theme}>
-        <StatusBar
+          <StatusBar
           backgroundColor="#9900ff"
           barStyle={'light-content'}
           hidden={false}
         />
+
         <NavigationContainer>
           <Drawer.Navigator
+              drawerPosition="left"
+              initalRoutName="Not given"
+              screenOptions={{headerStyle:{backgroundColor:'yellow'}}}
+              backBehavior="none"
+              openByDefault="true"
+              drawerType="front"
+              sceneContainerStyle=""
+
+
             initialRouteName="Home"
             drawerStyle={{
               marginTop: 100,
               width: 240,
               fontSize: RFValue(24),
             }}>
-            <Drawer.Screen name="Home" component={Allstations} />
-            <Drawer.Screen name="Favorites" component={Favorites} />
+
+            <Drawer.Screen name="Home" component={Allstations} options={{title:'Home2'}}/>
+            <Drawer.Screen name="Favorites" component={Favorites} options={{title:'Favorites2'}}/>
+            <Drawer.Screen name="test" component={Favorites} options={{title:'Welcome'}}></Drawer.Screen>
           </Drawer.Navigator>
         </NavigationContainer>
+
       </ThemeProvider>
+
     );
   }
 }
+//https://reactnavigation.org/docs/drawer-navigator/

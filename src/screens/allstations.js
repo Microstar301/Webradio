@@ -6,44 +6,53 @@ import {
   StyleSheet,
   FlatList,
   Image,
-  ImageBackground,
-  TouchableOpacity,
-  StatusBar,
-  ScrollView,
+  Vibration,
+  ToastAndroid,
 } from 'react-native';
 import RNTrackPlayer from 'react-native-track-player';
 import {Button, ThemeProvider} from 'react-native-elements';
 import Icon from 'react-native-material-ui/src/Icon';
 import TextTicker from 'react-native-text-ticker';
 import {RFPercentage, RFValue} from 'react-native-responsive-fontsize';
+import AsyncStorage from '@react-native-community/async-storage';
 
 // ON ERROR INSTALL THIS:
 // https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
 // npm install --save react-native-material-ui
+// npm install react-native-root-toast
 
 //<Image source={{uri: {thumb}.thumb}} style={styles.pic} />
-function Item({title, onPress, thumb}) {
+function Item({title, onPress, onLongPress, thumb}) {
   return (
     <View style={styles.items}>
       <Button
         title={title.toString()}
+        buttonStyle={styles.buttonStation}
         style={styles.buttonStation}
+        onLongPress={onLongPress}
         onPress={onPress}
         rounded={true}
-        icon={<Image source={{uri: {thumb}.thumb}} style={styles.pic} />}
+        icon={<Image source={{uri: thumb}} style={styles.pic} />}
       />
     </View>
   );
 }
 
-class Allstations extends Component {
-  Alstations({Navigation}) {
-    this.updateJSON();
+const storeData = async (key, value) => {
+  try {
+    AsyncStorage.clear();
+    console.log(key + ' saved ' + value.toString());
+    await AsyncStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    // saving error
   }
+};
 
+class Allstations extends Component {
   state = {
     curTrack: '',
     curImg: 'https://protepto.com/stuff/mot/note.png',
+    favorites: [],
   };
 
   buttonLabel = {
@@ -59,10 +68,10 @@ class Allstations extends Component {
   };
 
   addTrack = (tid, title, url, artwork) => {
-    var track = {
+    const track = {
       id: tid, // Must be a string, required
       url: url, // Load media from the network
-      artist: '1',
+      artist: 'Webradio',
       title: title,
       artwork: artwork, // Load artwork from the network
     };
@@ -85,9 +94,63 @@ class Allstations extends Component {
       });
       await this.updateTrack();
     } else {
-      this.onLaunch();
+      await this.onLaunch();
     }
   };
+
+  getData = async key => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      if (value !== null) {
+        return JSON.parse(value);
+      }
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  async changeFavorite(id) {
+    await this.updateFavorites();
+    let arrfav = [];
+    if (typeof this.state.favorites != 'object') {
+      console.log('no favorites found.');
+      let arrfav = [];
+      arrfav.push(parseInt(id));
+      storeData('fstations', arrfav);
+    } else {
+      let found = false;
+      let error = false;
+      this.state.favorites.map(function(o) {
+        if (typeof o != 'number' || typeof o == null) {
+          AsyncStorage.clear();
+          console.log('DB inconsistency detected!!');
+          error = true;
+          return;
+        }
+        if (o == id) {
+          found = true;
+        } else {
+          arrfav.push(o);
+        }
+      });
+      if (!found) {
+        arrfav.push(parseInt(id));
+        ToastAndroid.show('Added ' + id + ' to favorites.', ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show(
+          'Removed ' + id + ' from favorites.',
+          ToastAndroid.SHORT,
+        );
+      }
+      if (!error) {
+        storeData('fstations', arrfav);
+      }
+      Vibration.vibrate(4, false);
+      this.updateFavorites().then(
+        console.log(JSON.stringify(this.state.favorites)),
+      );
+    }
+  }
 
   setPause = () => {
     this.buttonLabel.pauseTogg = 'Pause';
@@ -182,7 +245,25 @@ class Allstations extends Component {
     await this.updateTrack();
   };
 
+  async updateFavorites() {
+    this.setState({
+      favorites: await this.getData('fstations'),
+    });
+  }
+  async onFirstLaunch() {
+    await this.updateFavorites();
+    if (this.state.favorites == null) {
+      console.log('no favorites found!');
+      ToastAndroid.showWithGravity(
+        'Long Press to favorite station!',
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER,
+      );
+    }
+  }
+
   componentDidMount() {
+    this.onFirstLaunch();
     this.updateJSON();
     this.onLaunch().then(() => null);
   }
@@ -224,6 +305,7 @@ class Allstations extends Component {
                   item.station_picture,
                 )
               }
+              onLongPress={() => this.changeFavorite(item.station_id)}
               thumb={item.station_picture}
             />
           )}
@@ -370,14 +452,16 @@ const styles = StyleSheet.create({
     width: 64,
     resizeMode: 'contain',
     marginRight: 16,
+    marginLeft: 8,
   },
   buttonStation: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   items: {
     borderRadius: 100,
     marginVertical: 8,
     marginHorizontal: 16,
+    flex: 1,
   },
   hamburgerMenu: {
     color: '#ffffff',

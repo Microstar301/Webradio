@@ -31,7 +31,7 @@ function Item({title, onPress, thumb}) {
         style={styles.buttonStation}
         onPress={onPress}
         rounded={true}
-        icon={<Image source={{uri: {thumb}.thumb}} style={styles.pic} />}
+        icon={<Image source={{uri: thumb}} style={styles.pic} />}
       />
     </View>
   );
@@ -145,13 +145,13 @@ class Favorites extends Component {
     fetch('https://protepto.com/stuff/mot/stations.php')
       .then(response => response.json())
       .then(responseJson => {
-        let st = [];
-        responseJson.forEach(item => {
-          if (item.station_id % 2 == 0) {
-            st.push(parseInt(item.station_id));
-          }
-        });
-        storeData('fstations', st);
+        // let st = [];
+        // responseJson.forEach(item => {
+        //   if (item.station_id % 2 == 0) {
+        //     st.push(parseInt(item.station_id));
+        //   }
+        // });
+        // storeData('fstations', st);
         this.setState({
           dataSource: responseJson,
         });

@@ -19,7 +19,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 // ON ERROR INSTALL THIS:
 // https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
 // npm install --save react-native-material-ui
-// npm install react-native-root-toast
 
 //<Image source={{uri: {thumb}.thumb}} style={styles.pic} />
 function Item({title, onPress, onLongPress, thumb}) {
@@ -57,7 +56,6 @@ class Allstations extends Component {
 
   buttonLabel = {
     pauseIcon: 'play-arrow',
-    pauseTogg: 'Play',
     stopBut: 'stop',
   };
 
@@ -153,12 +151,10 @@ class Allstations extends Component {
   }
 
   setPause = () => {
-    this.buttonLabel.pauseTogg = 'Pause';
     this.buttonLabel.pauseIcon = 'pause';
   };
 
   setPlay = () => {
-    this.buttonLabel.pauseTogg = 'Play';
     this.buttonLabel.pauseIcon = 'play-arrow';
   };
 
@@ -251,6 +247,10 @@ class Allstations extends Component {
     });
   }
   async onFirstLaunch() {
+    this.props.navigation.addListener('focus', () => {
+      this.updateJSON();
+      this.updateTrack();
+    });
     await this.updateFavorites();
     if (this.state.favorites == null) {
       console.log('no favorites found!');
@@ -371,7 +371,7 @@ class Allstations extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 0,
+    flex: 1,
   },
   header: {
     fontSize: RFValue(32, 1080),

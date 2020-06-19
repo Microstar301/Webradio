@@ -6,10 +6,8 @@ import {
   StyleSheet,
   FlatList,
   Image,
-  ImageBackground,
-  TouchableOpacity,
-  StatusBar,
-  ScrollView,
+  Vibration,
+  ToastAndroid,
 } from 'react-native';
 import RNTrackPlayer from 'react-native-track-player';
 import {Button, ThemeProvider} from 'react-native-elements';
@@ -22,13 +20,14 @@ import AsyncStorage from '@react-native-community/async-storage';
 // https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
 // npm install --save react-native-material-ui
 
-//<Image source={{uri: {thumb}.thumb}} style={styles.pic} />
-function Item({title, onPress, thumb}) {
+function Item({title, onPress, onLongPress, thumb}) {
   return (
     <View style={styles.items}>
       <Button
         title={title.toString()}
+        buttonStyle={styles.buttonStation}
         style={styles.buttonStation}
+        onLongPress={onLongPress}
         onPress={onPress}
         rounded={true}
         icon={<Image source={{uri: thumb}} style={styles.pic} />}
@@ -39,7 +38,8 @@ function Item({title, onPress, thumb}) {
 
 const storeData = async (key, value) => {
   try {
-    console.log(key + ' saved ' + value);
+    AsyncStorage.clear();
+    console.log(key + ' saved ' + value.toString());
     await AsyncStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
     // saving error
@@ -47,24 +47,11 @@ const storeData = async (key, value) => {
 };
 
 class Favorites extends Component {
-  Favorites({Navigation}) {
-    this.updateJSON();
-  }
-
-  getData = async key => {
-    try {
-      const value = await AsyncStorage.getItem(key);
-      if (value !== null) {
-        return JSON.parse(value);
-      }
-    } catch (e) {
-      // error reading value
-    }
-  };
-
   state = {
     curTrack: '',
     curImg: 'https://protepto.com/stuff/mot/note.png',
+    favorites: [],
+    refresh: false,
   };
 
   buttonLabel = {
@@ -80,10 +67,10 @@ class Favorites extends Component {
   };
 
   addTrack = (tid, title, url, artwork) => {
-    var track = {
+    const track = {
       id: tid, // Must be a string, required
       url: url, // Load media from the network
-      artist: '1',
+      artist: 'Webradio',
       title: title,
       artwork: artwork, // Load artwork from the network
     };
@@ -93,7 +80,6 @@ class Favorites extends Component {
   };
 
   stopMusic = async () => {
-    let vals = await this.getData('fstations');
     const state = await RNTrackPlayer.getState();
     if (
       state == RNTrackPlayer.STATE_PLAYING ||
@@ -101,15 +87,70 @@ class Favorites extends Component {
     ) {
       await RNTrackPlayer.stop();
       this.setPlay();
+      await this.updateTrack();
       this.setState({
         curImg: 'https://protepto.com/stuff/mot/note.png',
         curTrack: '',
       });
-      await this.updateTrack();
     } else {
-      this.onLaunch();
+      await this.onLaunch();
     }
   };
+
+  getData = async key => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      if (value !== null) {
+        return JSON.parse(value);
+      }
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  async changeFavorite(id) {
+    await this.updateFavorites();
+    let arrfav = [];
+    if (typeof this.state.favorites !== 'object') {
+      console.log('no favorites found.');
+      let arrfav = [];
+      arrfav.push(parseInt(id));
+      storeData('fstations', arrfav);
+    } else {
+      let found = false;
+      let error = false;
+      this.state.favorites.map(function(o) {
+        if (typeof o !== 'number' || typeof o == null) {
+          AsyncStorage.clear();
+          console.log('DB inconsistency detected!!');
+          error = true;
+          return;
+        }
+        if (o == id) {
+          found = true;
+        } else {
+          arrfav.push(o);
+        }
+      });
+      if (!found) {
+        arrfav.push(parseInt(id));
+        ToastAndroid.show('Added ' + id + ' to favorites.', ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show(
+          'Removed ' + id + ' from favorites.',
+          ToastAndroid.SHORT,
+        );
+      }
+      if (!error) {
+        storeData('fstations', arrfav);
+      }
+      Vibration.vibrate(4, false);
+      this.updateJSON();
+      this.updateFavorites().then(
+        console.log(JSON.stringify(this.state.favorites)),
+      );
+    }
+  }
 
   setPause = () => {
     this.buttonLabel.pauseTogg = 'Pause';
@@ -122,7 +163,6 @@ class Favorites extends Component {
   };
 
   togglePauseMusic = async () => {
-    AsyncStorage.clear();
     const state = await RNTrackPlayer.getState();
     if (state == RNTrackPlayer.STATE_PLAYING) {
       await RNTrackPlayer.pause().then(this.onLaunch());
@@ -145,15 +185,16 @@ class Favorites extends Component {
     fetch('https://protepto.com/stuff/mot/stations.php')
       .then(response => response.json())
       .then(responseJson => {
-        // let st = [];
-        // responseJson.forEach(item => {
-        //   if (item.station_id % 2 == 0) {
-        //     st.push(parseInt(item.station_id));
-        //   }
-        // });
-        // storeData('fstations', st);
+        let favos = [];
+        let favorites = this.state.favorites;
+        responseJson.map(function(station) {
+          if (favorites.includes(parseInt(station.station_id))) {
+            favos.push(station);
+          }
+        });
         this.setState({
           dataSource: responseJson,
+          favolist: favos,
         });
         this.updateTrack();
       })
@@ -212,7 +253,37 @@ class Favorites extends Component {
     await this.updateTrack();
   };
 
+  async updateFavorites() {
+    this.setState({
+      favorites: await this.getData('fstations'),
+    });
+  }
+  async onFirstLaunch() {
+    await this.updateFavorites();
+    this.props.navigation.addListener('focus', () => {
+      this.updateFavorites();
+      this.updateJSON();
+      this.updateTrack();
+      if (this.state.favolist.length <= 0) {
+        ToastAndroid.showWithGravity(
+          'No favorites added yet.',
+          ToastAndroid.LONG,
+          ToastAndroid.CENTER,
+        );
+      }
+    });
+    if (this.state.favorites == null) {
+      console.log('no favorites found!');
+      ToastAndroid.showWithGravity(
+        'Long Press to favorite station!',
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER,
+      );
+    }
+  }
+
   componentDidMount() {
+    this.onFirstLaunch();
     this.updateJSON();
     this.onLaunch().then(() => null);
   }
@@ -241,25 +312,29 @@ class Favorites extends Component {
             Webradio
           </Text>
         </View>
-        <FlatList
-          data={this.retrieveFavorites}
-          renderItem={({item}) => (
-            <Item
-              title={item.station_name}
-              onPress={() =>
-                this.playRadio(
-                  item.valueOf,
-                  'Name',
-                  'https://protepto.com/media/mikuleek.mp3',
-                  'https://protepto.com/media/leek.png',
-                )
-              }
-              thumb={item.station_picture}
-            />
-          )}
-          keyExtractor={item => item.station_id}
-          style={styles.list}
-        />
+        <View style={styles.flatList}>
+          <FlatList
+            data={this.state.favolist}
+            extraData={this.state.refresh}
+            renderItem={({item}) => (
+              <Item
+                title={item.station_name}
+                onPress={() =>
+                  this.playRadio(
+                    item.station_id,
+                    item.station_name,
+                    item.station_url,
+                    item.station_picture,
+                  )
+                }
+                onLongPress={() => this.changeFavorite(item.station_id)}
+                thumb={item.station_picture}
+              />
+            )}
+            keyExtractor={item => item.station_id}
+            style={styles.list}
+          />
+        </View>
         <View style={[styles.footer]}>
           <View style={styles.controlButtons}>
             <View
@@ -319,7 +394,7 @@ class Favorites extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 0,
+    flex: 1,
   },
   header: {
     fontSize: RFValue(32, 1080),
@@ -348,6 +423,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  flatList: {
+    flexGrow: 0,
   },
   controlButtons: {
     flex: 1,
@@ -400,14 +478,16 @@ const styles = StyleSheet.create({
     width: 64,
     resizeMode: 'contain',
     marginRight: 16,
+    marginLeft: 8,
   },
   buttonStation: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   items: {
     borderRadius: 100,
     marginVertical: 8,
     marginHorizontal: 16,
+    flex: 1,
   },
   hamburgerMenu: {
     color: '#ffffff',

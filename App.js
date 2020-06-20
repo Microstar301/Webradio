@@ -1,19 +1,7 @@
 import React, {Component} from 'react';
 
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-  StatusBar,
-  ScrollView,
-} from 'react-native';
-import RNTrackPlayer from 'react-native-track-player';
-import {Button, ThemeProvider} from 'react-native-elements';
-import Icon from 'react-native-material-ui/src/Icon';
+import {StatusBar} from 'react-native';
+import {ThemeProvider} from 'react-native-elements';
 import Allstations from './src/screens/allstations';
 import Favorites from './src/screens/favorites';
 import {NavigationContainer} from '@react-navigation/native';
@@ -21,12 +9,14 @@ import {createDrawerNavigator} from '@react-navigation/drawer';
 import {RFValue} from 'react-native-responsive-fontsize';
 
 const Drawer = createDrawerNavigator();
+
 const theme = {
   colors: {
     primary: '#570091',
   },
 };
 
+// Parts from https://reactnavigation.org/docs/drawer-based-navigation/
 export default class App extends Component {
   render() {
     return (
@@ -70,4 +60,3 @@ export default class App extends Component {
     );
   }
 }
-//https://reactnavigation.org/docs/drawer-navigator/

@@ -21,22 +21,69 @@ import AsyncStorage from '@react-native-community/async-storage';
 // npm install --save react-native-material-ui
 
 //<Image source={{uri: {thumb}.thumb}} style={styles.pic} />
-function Item({title, onPress, onLongPress, thumb}) {
-  return (
-    <View style={styles.items}>
-      <Button
-        title={title.toString()}
-        buttonStyle={styles.buttonStation}
-        style={styles.buttonStation}
-        onLongPress={onLongPress}
-        onPress={onPress}
-        rounded={true}
-        icon={<Image source={{uri: thumb}} style={styles.pic} />}
-      />
-    </View>
-  );
+function Item({title, onPress, onLongPress, thumb, country}) {
+  let piece;
+
+  if (
+    lastcountry != country.toString() &&
+    typeof lastcountry === 'string' &&
+    typeof country === 'string'
+  ) {
+    piece = (
+      <View>
+        <Text style={styles.cat}>{country}</Text>
+
+        <View style={styles.items}>
+          <Button
+            title={title.toString()}
+            buttonStyle={styles.buttonStation}
+            onLongPress={onLongPress}
+            onPress={onPress}
+            rounded={true}
+            icon={<Image source={{uri: thumb}} style={styles.pic} />}
+          />
+        </View>
+      </View>
+    );
+    lastcountry = country;
+  } else {
+    piece = (
+      <View style={styles.items}>
+        <Button
+          title={title.toString()}
+          buttonStyle={styles.buttonStation}
+          style={styles.buttonStation}
+          onLongPress={onLongPress}
+          onPress={onPress}
+          rounded={true}
+          icon={<Image source={{uri: thumb}} style={styles.pic} />}
+        />
+      </View>
+    );
+  }
+
+  if (typeof country === 'string') {
+    console.log(typeof country);
+    console.log(country);
+  }
+
+  return piece;
+}
+let lastcountry = '';
+
+//Code from https://medium.com/@asadise/sorting-a-json-array-according-one-property-in-javascript-18b1d22cd9e9
+function sortByProperty(property) {
+  return function(a, b) {
+    if (a[property] > b[property]) {
+      return 1;
+    } else if (a[property] < b[property]) {
+      return -1;
+    }
+    return 0;
+  };
 }
 
+// Parts from https://react-native-community.github.io/async-storage/docs/api
 const storeData = async (key, value) => {
   try {
     AsyncStorage.clear();
@@ -49,6 +96,7 @@ const storeData = async (key, value) => {
 
 class Allstations extends Component {
   state = {
+    lastcountry: '',
     curTrack: '',
     curImg: 'https://protepto.com/stuff/mot/note.png',
     favorites: [],
@@ -96,6 +144,7 @@ class Allstations extends Component {
     }
   };
 
+  // Parts from https://react-native-community.github.io/async-storage/docs/api
   getData = async key => {
     try {
       const value = await AsyncStorage.getItem(key);
@@ -110,8 +159,7 @@ class Allstations extends Component {
   async changeFavorite(id) {
     await this.updateFavorites();
     let arrfav = [];
-    if (typeof this.state.favorites != 'object') {
-      console.log('no favorites found.');
+    if (typeof this.state.favorites !== 'object') {
       let arrfav = [];
       arrfav.push(parseInt(id));
       storeData('fstations', arrfav);
@@ -119,7 +167,7 @@ class Allstations extends Component {
       let found = false;
       let error = false;
       this.state.favorites.map(function(o) {
-        if (typeof o != 'number' || typeof o == null) {
+        if (typeof o !== 'number' || typeof o == null) {
           AsyncStorage.clear();
           console.log('DB inconsistency detected!!');
           error = true;
@@ -181,6 +229,7 @@ class Allstations extends Component {
     fetch('https://protepto.com/stuff/mot/stations.php')
       .then(response => response.json())
       .then(responseJson => {
+        responseJson = responseJson.sort(sortByProperty('station_location'));
         this.setState({
           dataSource: responseJson,
         });
@@ -246,6 +295,7 @@ class Allstations extends Component {
       favorites: await this.getData('fstations'),
     });
   }
+
   async onFirstLaunch() {
     this.props.navigation.addListener('focus', () => {
       this.updateJSON();
@@ -255,7 +305,7 @@ class Allstations extends Component {
     if (this.state.favorites == null) {
       console.log('no favorites found!');
       ToastAndroid.showWithGravity(
-        'Long Press to favorite station!',
+        'Long press to favorite station!',
         ToastAndroid.LONG,
         ToastAndroid.CENTER,
       );
@@ -307,6 +357,7 @@ class Allstations extends Component {
               }
               onLongPress={() => this.changeFavorite(item.station_id)}
               thumb={item.station_picture}
+              country={item.station_location}
             />
           )}
           keyExtractor={item => item.station_id}
@@ -370,9 +421,11 @@ class Allstations extends Component {
 }
 
 const styles = StyleSheet.create({
+  //MAIN CONTAINER
   container: {
     flex: 1,
   },
+  // HEADER WITH BUTTON
   header: {
     fontSize: RFValue(32, 1080),
     flex: 1,
@@ -386,6 +439,8 @@ const styles = StyleSheet.create({
     elevation: 10,
     flexDirection: 'row',
   },
+
+  // FOOTER WITH CONTROLS
   footer: {
     flex: 1,
     height: 100,
@@ -401,6 +456,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  // CONTROL BUTTON VIEW
   controlButtons: {
     flex: 1,
     marginTop: 16,
@@ -410,6 +466,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-between',
   },
+  //TRACK NAME CONTAINER
   trackContainer: {
     flex: 2,
     paddingTop: 16,
@@ -419,12 +476,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontSize: 20,
   },
+  // TRACK NAME TEXT
   trackName: {
     fontSize: 20,
     color: '#000000',
     textAlign: 'left',
     textAlignVertical: 'center',
   },
+  // MAIN TITLE
   title: {
     fontSize: RFValue(32, 900),
     color: '#ffffff',
@@ -438,15 +497,18 @@ const styles = StyleSheet.create({
     letterSpacing: 16,
     textAlign: 'center',
   },
+  // MAIN STATION LIST
   list: {
     marginTop: 100,
     marginBottom: 100,
   },
+  // PLAY/PAUSE AND STOP BUTTON
   button_controls: {
     elevation: 0,
     width: 64,
     height: 64,
   },
+  // CURRENT TRACK ARTWORK
   pic: {
     height: 64,
     width: 64,
@@ -454,21 +516,31 @@ const styles = StyleSheet.create({
     marginRight: 16,
     marginLeft: 8,
   },
+  // STATION BUTTON
   buttonStation: {
     justifyContent: 'flex-start',
   },
+  // CATEGORY / COUNTRY
+  cat: {
+    fontSize: RFValue(20),
+    marginLeft: 16,
+    marginTop: 8,
+  },
+  // STATIONS
   items: {
     borderRadius: 100,
     marginVertical: 8,
     marginHorizontal: 16,
     flex: 1,
   },
+  // DRAWER BUTTON CONTAINER
   hamburgerMenu: {
     color: '#ffffff',
     padding: 8,
     marginTop: 8,
     fontSize: 32,
   },
+  // DRAWER BUTTON
   hamburgerMenuIcon: {
     padding: 8,
     color: '#ffffff',

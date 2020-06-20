@@ -16,17 +16,12 @@ import TextTicker from 'react-native-text-ticker';
 import {RFPercentage, RFValue} from 'react-native-responsive-fontsize';
 import AsyncStorage from '@react-native-community/async-storage';
 
-// ON ERROR INSTALL THIS:
-// https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
-// npm install --save react-native-material-ui
-
 function Item({title, onPress, onLongPress, thumb}) {
   return (
     <View style={styles.items}>
       <Button
         title={title.toString()}
         buttonStyle={styles.buttonStation}
-        style={styles.buttonStation}
         onLongPress={onLongPress}
         onPress={onPress}
         rounded={true}
@@ -35,7 +30,7 @@ function Item({title, onPress, onLongPress, thumb}) {
     </View>
   );
 }
-
+// Parts from https://react-native-community.github.io/async-storage/docs/api
 const storeData = async (key, value) => {
   try {
     AsyncStorage.clear();
@@ -65,10 +60,10 @@ class Favorites extends Component {
       console.debug('Trackplayer set up!');
     });
   };
-
+  // Parts from https://react-native-track-player.js.org/getting-started/
   addTrack = (tid, title, url, artwork) => {
     const track = {
-      id: tid, // Must be a string, required
+      id: tid, // ID from Database
       url: url, // Load media from the network
       artist: 'Webradio',
       title: title,
@@ -97,6 +92,7 @@ class Favorites extends Component {
     }
   };
 
+  // Parts from https://react-native-community.github.io/async-storage/docs/api
   getData = async key => {
     try {
       const value = await AsyncStorage.getItem(key);
@@ -112,10 +108,9 @@ class Favorites extends Component {
     await this.updateFavorites();
     let arrfav = [];
     if (typeof this.state.favorites !== 'object') {
-      console.log('no favorites found.');
       let arrfav = [];
       arrfav.push(parseInt(id));
-      storeData('fstations', arrfav);
+      await storeData('fstations', arrfav);
     } else {
       let found = false;
       let error = false;
@@ -181,17 +176,20 @@ class Favorites extends Component {
     //});
   };
 
+  // Parts from https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   updateJSON = () => {
     fetch('https://protepto.com/stuff/mot/stations.php')
       .then(response => response.json())
       .then(responseJson => {
         let favos = [];
         let favorites = this.state.favorites;
-        responseJson.map(function(station) {
-          if (favorites.includes(parseInt(station.station_id))) {
-            favos.push(station);
-          }
-        });
+        if (typeof favorites !== 'undefined') {
+          responseJson.map(function(station) {
+            if (favorites.includes(parseInt(station.station_id))) {
+              favos.push(station);
+            }
+          });
+        }
         this.setState({
           dataSource: responseJson,
           favolist: favos,
@@ -260,20 +258,24 @@ class Favorites extends Component {
   }
   async onFirstLaunch() {
     await this.updateFavorites();
+    if (typeof this.state.favorites === 'undefined') {
+      storeData('fstations', Array.empty);
+    }
     this.props.navigation.addListener('focus', () => {
       this.updateFavorites();
       this.updateJSON();
       this.updateTrack();
-      if (this.state.favolist.length <= 0) {
-        ToastAndroid.showWithGravity(
-          'No favorites added yet.',
-          ToastAndroid.LONG,
-          ToastAndroid.CENTER,
-        );
+      if (typeof this.state.favolist !== 'undefined') {
+        if (this.state.favolist.length <= 0) {
+          ToastAndroid.showWithGravity(
+            'No favorites added yet.',
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER,
+          );
+        }
       }
     });
-    if (this.state.favorites == null) {
-      console.log('no favorites found!');
+    if (typeof this.state.favorites == 'undefined') {
       ToastAndroid.showWithGravity(
         'Long Press to favorite station!',
         ToastAndroid.LONG,

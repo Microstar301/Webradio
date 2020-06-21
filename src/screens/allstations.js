@@ -16,14 +16,9 @@ import TextTicker from 'react-native-text-ticker';
 import {RFPercentage, RFValue} from 'react-native-responsive-fontsize';
 import AsyncStorage from '@react-native-community/async-storage';
 
-// ON ERROR INSTALL THIS:
-// https://github.com/xotahal/react-native-material-ui/blob/master/docs/GettingStarted.md
-// npm install --save react-native-material-ui
-
-//<Image source={{uri: {thumb}.thumb}} style={styles.pic} />
+// Parts from https://reactnative.dev/docs/flatlist
 function Item({title, onPress, onLongPress, thumb, country}) {
   let piece;
-
   if (
     lastcountry != country.toString() &&
     typeof lastcountry === 'string' &&
@@ -61,14 +56,14 @@ function Item({title, onPress, onLongPress, thumb, country}) {
       </View>
     );
   }
-
   if (typeof country === 'string') {
     console.log(typeof country);
     console.log(country);
   }
-
   return piece;
 }
+
+// Used for sort by country
 let lastcountry = '';
 
 //Code from https://medium.com/@asadise/sorting-a-json-array-according-one-property-in-javascript-18b1d22cd9e9
@@ -112,7 +107,7 @@ class Allstations extends Component {
       console.debug('Trackplayer set up!');
     });
   };
-
+  // Parts from https://react-native-track-player.js.org/getting-started/
   addTrack = (tid, title, url, artwork) => {
     const track = {
       id: tid, // Must be a string, required
@@ -214,15 +209,13 @@ class Allstations extends Component {
       await RNTrackPlayer.play().then(this.onLaunch);
     }
   };
+
   playRadio = async (tid, title, url, artwork) => {
     this.initPlayer();
     this.addTrack(tid, title, url, artwork);
     await RNTrackPlayer.play();
     this.setPause();
     await this.updateTrack();
-    //this.setState({
-    //  curTrack: await RNTrackPlayer.getCurrentTrack(),
-    //});
   };
 
   updateJSON = () => {

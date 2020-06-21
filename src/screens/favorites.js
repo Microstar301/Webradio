@@ -16,6 +16,7 @@ import TextTicker from 'react-native-text-ticker';
 import {RFPercentage, RFValue} from 'react-native-responsive-fontsize';
 import AsyncStorage from '@react-native-community/async-storage';
 
+// Parts from https://reactnative.dev/docs/flatlist
 function Item({title, onPress, onLongPress, thumb}) {
   return (
     <View style={styles.items}>
@@ -171,9 +172,6 @@ class Favorites extends Component {
     await RNTrackPlayer.play();
     this.setPause();
     await this.updateTrack();
-    //this.setState({
-    //  curTrack: await RNTrackPlayer.getCurrentTrack(),
-    //});
   };
 
   // Parts from https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -395,9 +393,11 @@ class Favorites extends Component {
 }
 
 const styles = StyleSheet.create({
+  //MAIN CONTAINER
   container: {
     flex: 1,
   },
+  // HEADER WITH BUTTON
   header: {
     fontSize: RFValue(32, 1080),
     flex: 1,
@@ -411,6 +411,8 @@ const styles = StyleSheet.create({
     elevation: 10,
     flexDirection: 'row',
   },
+
+  // FOOTER WITH CONTROLS
   footer: {
     flex: 1,
     height: 100,
@@ -426,6 +428,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  // List Container
   flatList: {
     flexGrow: 0,
   },
@@ -438,6 +441,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-between',
   },
+  //TRACK NAME CONTAINER
   trackContainer: {
     flex: 2,
     paddingTop: 16,
@@ -447,12 +451,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontSize: 20,
   },
+  // TRACK NAME TEXT
   trackName: {
     fontSize: 20,
     color: '#000000',
     textAlign: 'left',
     textAlignVertical: 'center',
   },
+  // MAIN TITLE
   title: {
     fontSize: RFValue(32, 900),
     color: '#ffffff',
@@ -466,15 +472,18 @@ const styles = StyleSheet.create({
     letterSpacing: 16,
     textAlign: 'center',
   },
+  // MAIN STATION LIST
   list: {
     marginTop: 100,
     marginBottom: 100,
   },
+  // PLAY/PAUSE AND STOP BUTTON
   button_controls: {
     elevation: 0,
     width: 64,
     height: 64,
   },
+  // CURRENT TRACK ARTWORK
   pic: {
     height: 64,
     width: 64,
@@ -482,21 +491,25 @@ const styles = StyleSheet.create({
     marginRight: 16,
     marginLeft: 8,
   },
+  // STATION BUTTON
   buttonStation: {
     justifyContent: 'flex-start',
   },
+  // STATIONS
   items: {
     borderRadius: 100,
     marginVertical: 8,
     marginHorizontal: 16,
     flex: 1,
   },
+  // DRAWER BUTTON CONTAINER
   hamburgerMenu: {
     color: '#ffffff',
     padding: 8,
     marginTop: 8,
     fontSize: 32,
   },
+  // DRAWER BUTTON
   hamburgerMenuIcon: {
     padding: 8,
     color: '#ffffff',
